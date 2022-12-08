@@ -1,14 +1,18 @@
 [Unit]
 Description=Simple yamui splash screen for SailfishOS
-Before=droid-hal-init.service
-After=tmp.mount
+Before=sailfish-unlock-agent.service
+Before=start-user-session.service
 DefaultDependencies=no
+Conflicts=shutdown.target
+Before=shutdown.target
 # To avoid starting again when swichting from emergency-call.target to graphical.target
-ConditionPathExists=!/tmp/.yamuisplash.done
+ConditionPathExists=!/run/yamuisplash/done
 
 [Service]
-Type=simple
+Type=notify
+Restart=no
 EnvironmentFile=-/var/lib/environment/compositor/*.conf
-ExecStart=/bin/sh /usr/bin/yamuisplash
-# make sure we run for at least 5 seconds for any touch initialization sequences to finish.
-ExecStartPost=/bin/sleep 5
+ExecStartPre=/bin/touch /run/yamuisplash/done
+ExecStart=/usr/bin/yamui --systemd /usr/share/yamuisplash/sailfish_logo_rgb.png
+RuntimeDirectory=yamuisplash
+RuntimeDirectoryPreserve=yes
